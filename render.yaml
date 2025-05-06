@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: backend
+    env: node
+    buildCommand: npm install
+    startCommand: node backend/index.js
+    plan: free
+    regions:
+      - frankfurt

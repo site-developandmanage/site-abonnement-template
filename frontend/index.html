@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abonnement</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Abonnez-vous à notre service</h1>
+  <form id="subscription-form">
+    <input type="email" id="email" placeholder="Votre email" required /><br><br>
+    <div id="card-element"></div><br>
+    <button type="submit">S’abonner</button>
+  </form>
+
+  <div id="error-message"></div>
+
+  <script src="config.js"></script>
+  <script>
+    const stripe = Stripe(PUBLIC_KEY);
+    const elements = stripe.elements();
+    const card = elements.create("card");
+    card.mount("#card-element");
+
+    const form = document.getElementById("subscription-form");
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const { token, error } = await stripe.createToken(card);
+      if (error) {
+        document.getElementById("error-message").textContent = error.message;
+        return;
+      }
+
+      const res = await fetch("/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: document.getElementById("email").value,
+          token: token.id,
+          priceId: PRICE_ID
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert("Abonnement réussi !");
+      } else {
+        document.getElementById("error-message").textContent = data.message || "Erreur d’abonnement.";
+      }
+    });
+  </script>
+</body>
+</html>
