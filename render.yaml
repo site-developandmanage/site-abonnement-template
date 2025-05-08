@@ -2,7 +2,7 @@ services:
   - type: web
     name: backend
     env: node
-    buildCommand: npm install
+    buildCommand: cd backend && npm install
     startCommand: node backend/index.js
     plan: free
     regions:
@@ -12,8 +12,7 @@ services:
     name: frontend
     env: static
     buildCommand: ""
-    startCommand: ""
+    staticPublishPath: frontend
     plan: free
     regions:
       - frankfurt
-    publish: /frontend
