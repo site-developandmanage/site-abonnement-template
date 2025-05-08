@@ -16,4 +16,4 @@ services:
     plan: free
     regions:
       - frankfurt
-    publish: /frontend  # Assurez-vous que ce chemin est correct
+    publish: /frontend
