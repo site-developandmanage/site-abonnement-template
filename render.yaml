@@ -2,7 +2,7 @@ services:
   - type: web
     name: backend
     env: node
-    buildCommand: cd backend && npm install
+    buildCommand: npm install
     startCommand: node backend/index.js
     plan: free
     regions:
@@ -12,7 +12,8 @@ services:
     name: frontend
     env: static
     buildCommand: ""
-    staticPublishPath: frontend
+    startCommand: ""
     plan: free
     regions:
       - frankfurt
+    publish: /frontend  # Assurez-vous que ce chemin est correct
