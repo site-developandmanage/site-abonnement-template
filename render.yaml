@@ -7,3 +7,13 @@ services:
     plan: free
     regions:
       - frankfurt
+
+  - type: web
+    name: frontend
+    env: static
+    buildCommand: ""
+    startCommand: ""
+    plan: free
+    regions:
+      - frankfurt
+    publish: /frontend
