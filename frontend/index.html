@@ -11,6 +11,7 @@
   <h1>Abonnez-vous à notre service</h1>
   <form id="subscription-form">
     <input type="email" id="email" placeholder="Votre email" required /><br><br>
+    <!-- Le champ pour la carte bancaire -->
     <div id="card-element"></div><br>
     <button type="submit">S’abonner</button>
   </form>
@@ -19,28 +20,31 @@
 
   <script src="config.js"></script>
   <script>
-    const stripe = Stripe(PUBLIC_KEY);
+    // Assurez-vous que PUBLIC_KEY est définie dans config.js
+    const stripe = Stripe(PUBLIC_KEY); 
     const elements = stripe.elements();
-    const card = elements.create("card");
-    card.mount("#card-element");
+    const card = elements.create("card");  // Crée un élément de carte bancaire
+    card.mount("#card-element");  // Attache l'élément à l'élément avec l'ID 'card-element'
 
     const form = document.getElementById("subscription-form");
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
+      // Crée un token de carte avec Stripe
       const { token, error } = await stripe.createToken(card);
       if (error) {
         document.getElementById("error-message").textContent = error.message;
         return;
       }
 
+      // Envoie le token, l'email et l'ID de prix au serveur backend
       const res = await fetch("/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: document.getElementById("email").value,
           token: token.id,
-          priceId: PRICE_ID
+          priceId: PRICE_ID  // Remplacer par un prix réel de Stripe
         }),
       });
 
