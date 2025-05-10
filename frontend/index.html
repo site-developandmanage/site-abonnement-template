@@ -20,10 +20,9 @@
 
   <!-- Importation de config.js en tant que module -->
   <script type="module">
-    import { PUBLIC_KEY, PRICE_ID } from './config.js';
+    import { PUBLIC_KEY, PRICE_ID } from './config.js';  // Importation correcte de config.js
 
-    // Assurez-vous que PUBLIC_KEY est définie dans config.js
-    const stripe = Stripe(PUBLIC_KEY);
+    const stripe = Stripe(PUBLIC_KEY); // Clé publique Stripe
     const elements = stripe.elements();
     const card = elements.create("card");  // Crée un élément de carte bancaire
     card.mount("#card-element");  // Attache l'élément à l'élément avec l'ID 'card-element'
@@ -40,7 +39,7 @@
       }
 
       // Envoie le token, l'email et l'ID de prix au serveur backend
-      const res = await fetch("/subscribe", {
+      const res = await fetch("/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -51,10 +50,10 @@
       });
 
       const data = await res.json();
-      if (data.success) {
-        alert("Abonnement réussi !");
+      if (data.url) {
+        window.location.href = data.url;  // Rediriger vers l'URL de la session de paiement
       } else {
-        document.getElementById("error-message").textContent = data.message || "Erreur d’abonnement.";
+        document.getElementById("error-message").textContent = "Erreur d’abonnement.";
       }
     });
   </script>
