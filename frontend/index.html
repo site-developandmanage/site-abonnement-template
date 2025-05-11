@@ -15,7 +15,7 @@
     <button type="submit">S’abonner</button>
   </form>
 
-  <div id="error-message"></div>
+  <div id="error-message" style="color: red; margin-top: 10px;"></div>
 
   <script type="module">
     import { PUBLIC_KEY, PRICE_ID } from './config.js';
@@ -35,9 +35,8 @@
         return;
       }
 
-      let data = {};
       try {
-        const response = await fetch("/subscribe", {
+        const res = await fetch("/subscribe", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -47,16 +46,18 @@
           }),
         });
 
-        data = await response.json();
-      } catch (e) {
-        document.getElementById("error-message").textContent = "Erreur lors de la communication avec le serveur.";
-        return;
-      }
+        const data = await res.json().catch(() => {
+          throw new Error("Réponse invalide du serveur");
+        });
 
-      if (data.success) {
-        alert("Abonnement réussi !");
-      } else {
-        document.getElementById("error-message").textContent = data.message || "Erreur d’abonnement.";
+        if (data.success) {
+          alert("Abonnement réussi !");
+        } else {
+          document.getElementById("error-message").textContent = data.message || "Erreur d’abonnement.";
+        }
+      } catch (err) {
+        document.getElementById("error-message").textContent =
+          "Erreur lors de la communication avec le serveur : " + err.message;
       }
     });
   </script>
