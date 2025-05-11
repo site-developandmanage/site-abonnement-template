@@ -1,47 +1,48 @@
-// backend/server.js
+const express = require("express");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const cors = require("cors");
+const dotenv = require("dotenv");
 
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const Stripe = require('stripe');
-const path = require('path');
-
-// Charge les variables d'environnement depuis /backend/.env
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 4242;
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
 app.use(express.json());
 
-app.post('/subscribe', async (req, res) => {
-  const { email, token, priceId } = req.body;
-
+app.post("/subscribe", async (req, res) => {
   try {
-    // 1. Créer un client Stripe avec l’email
+    const { email, token, priceId } = req.body;
+
+    if (!email || !token || !priceId) {
+      return res.status(400).json({
+        success: false,
+        message: "Champs manquants",
+      });
+    }
+
     const customer = await stripe.customers.create({
       email,
-      source: token, // Utilise le token Stripe fourni
+      source: token,
     });
 
-    // 2. Créer un abonnement
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
       items: [{ price: priceId }],
     });
 
-    res.json({ success: true, subscriptionId: subscription.id }); // Réponse JSON
-  } catch (error) {
-    console.error('Erreur lors de l’abonnement :', error);
+    res.json({ success: true, subscriptionId: subscription.id });
+
+  } catch (err) {
+    console.error("Erreur backend :", err);
     res.status(500).json({
       success: false,
-      message: error.message || 'Erreur lors de la création de l’abonnement.',
+      message: err.message || "Erreur serveur",
     });
   }
 });
 
-app.listen(port, () => {
-  console.log(`✅ Serveur backend démarré sur http://localhost:${port}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Serveur backend démarré sur http://localhost:${PORT}`);
 });
