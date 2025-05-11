@@ -32,12 +32,12 @@ app.post('/subscribe', async (req, res) => {
       items: [{ price: priceId }],
     });
 
-    res.json({ success: true, subscriptionId: subscription.id });
+    res.json({ success: true, subscriptionId: subscription.id }); // Réponse JSON
   } catch (error) {
     console.error('Erreur lors de l’abonnement :', error);
     res.status(500).json({
       success: false,
-      message: 'Erreur lors de la création de l’abonnement.',
+      message: error.message || 'Erreur lors de la création de l’abonnement.',
     });
   }
 });

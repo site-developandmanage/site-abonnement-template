@@ -1,3 +1,5 @@
+<!-- frontend/index.html -->
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -18,42 +20,44 @@
 
   <div id="error-message"></div>
 
-  <!-- Importation de config.js en tant que module -->
   <script type="module">
-    import { PUBLIC_KEY, PRICE_ID } from './config.js';  // Importation correcte de config.js
+    import { PUBLIC_KEY, PRICE_ID } from './config.js';
 
-    const stripe = Stripe(PUBLIC_KEY); // Clé publique Stripe
+    const stripe = Stripe(PUBLIC_KEY);
     const elements = stripe.elements();
-    const card = elements.create("card");  // Crée un élément de carte bancaire
-    card.mount("#card-element");  // Attache l'élément à l'élément avec l'ID 'card-element'
+    const card = elements.create("card");
+    card.mount("#card-element");
 
     const form = document.getElementById("subscription-form");
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      // Crée un token de carte avec Stripe
       const { token, error } = await stripe.createToken(card);
       if (error) {
         document.getElementById("error-message").textContent = error.message;
         return;
       }
 
-      // Envoie le token, l'email et l'ID de prix au serveur backend
-      const res = await fetch("/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: document.getElementById("email").value,
-          token: token.id,
-          priceId: PRICE_ID  // Utilisation du PRICE_ID importé
-        }),
-      });
+      try {
+        const res = await fetch("/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: document.getElementById("email").value,
+            token: token.id,
+            priceId: PRICE_ID,
+          }),
+        });
 
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;  // Rediriger vers l'URL de la session de paiement
-      } else {
-        document.getElementById("error-message").textContent = "Erreur d’abonnement.";
+        const data = await res.json(); // On parse directement en JSON
+        if (data.success) {
+          alert("Abonnement réussi !");
+        } else {
+          document.getElementById("error-message").textContent = data.message || "Erreur d’abonnement.";
+        }
+      } catch (err) {
+        console.error("Erreur lors de la communication avec le serveur", err);
+        document.getElementById("error-message").textContent = "Erreur serveur, veuillez réessayer plus tard.";
       }
     });
   </script>
